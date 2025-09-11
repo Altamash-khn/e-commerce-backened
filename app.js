@@ -108,4 +108,26 @@ app.get("/products", async function (req, res) {
   }
 });
 
+app.get("/products/:id", async function (req, res) {
+  try {
+    const id = req.params.id;
+
+    if (isNaN(id)) {
+      return res.status(400).send("Product ID must be a number");
+    }
+
+    const apiRes = await fetch(`https://fakestoreapi.com/products/${id}`);
+
+    if (!apiRes.ok) {
+      return res.status(apiRes.status).send("failed to fetch product");
+    }
+
+    const product = await apiRes.json();
+
+    res.json(product);
+  } catch (error) {
+    res.status(500).send("internal server error");
+  }
+});
+
 app.listen(3000);

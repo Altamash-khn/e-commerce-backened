@@ -33,9 +33,32 @@ function saveUsers(users) {
   }
 }
 
+app.post("/signup", (req, res) => {
+  const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).send("Username and password are required.");
+  }
+
+  try {
+    const users = readUsers();
+
+    if (users.find((u) => u.username === username)) {
+      return res.status(409).send("Username already exists.");
+    }
+
+    users.push({ username, password });
+    saveUsers(users);
+
+    res.status(201).send("user added successfully");
+  } catch (err) {
+    console.error("Signup error:", err.message);
+    res.status(500).send("Internal server error.");
+  }
+});
+
 app.get("/", function (req, res) {
   res.render("index");
 });
-
 
 app.listen(3000);

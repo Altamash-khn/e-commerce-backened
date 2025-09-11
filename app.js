@@ -91,4 +91,21 @@ app.post("/login", (req, res) => {
   }
 });
 
+app.get("/products", async function (req, res) {
+  try {
+    const apiRes = await fetch("https://fakestoreapi.com/products");
+
+    if (!apiRes.ok) {
+      return res
+        .status(apiRes.status)
+        .send("Failed to fetch products from API");
+    }
+    const data = await apiRes.json();
+
+    res.json(data);
+  } catch (err) {
+    res.status(500).send("internal server error");
+  }
+});
+
 app.listen(3000);

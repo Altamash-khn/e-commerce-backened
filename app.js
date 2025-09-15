@@ -130,4 +130,8 @@ app.get("/products/:id", async function (req, res) {
   }
 });
 
+app.post("/logout", (req, res) => {
+  res.status(200).send("Logout successful");
+});
+
 app.listen(3000);

@@ -1,11 +1,13 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
+const cors = require("cors");
 
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(cors());
 
 app.set("view engine", "ejs");
 app.set("views", "index");
@@ -102,7 +104,7 @@ app.get("/products", async function (req, res) {
     }
     const data = await apiRes.json();
 
-    res.json(data);
+    res.status(200).json(data);
   } catch (err) {
     res.status(500).send("internal server error");
   }

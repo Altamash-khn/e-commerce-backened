@@ -131,7 +131,6 @@ app.get("/products/:id", async function (req, res) {
   }
 });
 
-app.get("/categories", function (req, res) {
   app.get("/categories", async function (req, res) {
     try {
       const [fakeStorePromise, dummyJsonPromise] = [
@@ -166,7 +165,6 @@ app.get("/categories", function (req, res) {
       res.status(500).json({ error: "Internal server error" });
     }
   });
-});
 
 app.post("/logout", (req, res) => {
   res.status(200).send("Logout successful");

@@ -96,6 +96,7 @@ app.post("/login", (req, res) => {
 
 app.get("/products", async function (req, res) {
   try {
+    const apiRes = fetch("https://fakestoreapi.com/products");
     if (!apiRes.ok) {
       return res
         .status(apiRes.status)

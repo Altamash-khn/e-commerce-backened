@@ -13,6 +13,7 @@ app.set("view engine", "ejs");
 app.set("views", "index");
 
 const dataFile = path.join(__dirname, "data.json");
+const categories = [];
 
 function readUsers() {
   try {
@@ -35,7 +36,7 @@ function saveUsers(users) {
   }
 }
 
-app.get("/", function (req, res) {
+app.get("/", async function (req, res) {
   res.render("index");
 });
 
@@ -95,15 +96,12 @@ app.post("/login", (req, res) => {
 
 app.get("/products", async function (req, res) {
   try {
-    const apiRes = await fetch("https://fakestoreapi.com/products");
-
     if (!apiRes.ok) {
       return res
         .status(apiRes.status)
         .send("Failed to fetch products from API");
     }
     const data = await apiRes.json();
-
     res.status(200).json(data);
   } catch (err) {
     res.status(500).send("internal server error");
@@ -130,6 +128,43 @@ app.get("/products/:id", async function (req, res) {
   } catch (error) {
     res.status(500).send("internal server error");
   }
+});
+
+app.get("/categories", function (req, res) {
+  app.get("/categories", async function (req, res) {
+    try {
+      const [fakeStorePromise, dummyJsonPromise] = [
+        fetch("https://fakestoreapi.com/products/categories"),
+        fetch("https://dummyjson.com/products/categories"),
+      ];
+
+      const results = await Promise.allSettled([
+        fakeStorePromise,
+        dummyJsonPromise,
+      ]);
+
+      const successfulResults = results.filter(
+        (r) => r.status === "fulfilled" && r.value.ok
+      );
+
+      if (successfulResults.length === 0) {
+        return res
+          .status(502)
+          .json({ error: "Failed to fetch categories from both APIs" });
+      }
+
+      const data = await Promise.all(
+        successfulResults.map((r) => r.value.json())
+      );
+
+      const allCategories = [...new Set(data.flat())];
+
+      res.status(200).json(allCategories);
+    } catch (err) {
+      console.error("Error fetching categories:", err.message);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
 });
 
 app.post("/logout", (req, res) => {

@@ -96,14 +96,26 @@ app.post("/login", (req, res) => {
 
 app.get("/products", async function (req, res) {
   try {
-    const apiRes = await fetch("https://fakestoreapi.com/products");
-    if (!apiRes.ok) {
-      return res
-        .status(apiRes.status)
-        .send("Failed to fetch products from API");
-    }
-    const data = await apiRes.json();
-    res.status(200).json(data);
+    const [fakeStoreData, dummyJSONData] = [
+      fetch("https://fakestoreapi.com/products"),
+      fetch("https://dummyjson.com/products?limit=100"),
+    ];
+
+    const results = await Promise.allSettled([fakeStoreData, dummyJSONData]);
+
+    const successfulResults = results.filter(
+      (res) => res.status === "fulfilled"
+    );
+
+    const successfulResultsData = await Promise.all(
+      successfulResults.map((r) => r.value.json())
+    );
+
+    const finalData = successfulResultsData.flatMap((data) =>
+      Array.isArray(data) ? data : data.products
+    );
+
+    res.status(200).json(finalData);
   } catch (err) {
     res.status(500).send("internal server error");
   }
@@ -131,40 +143,40 @@ app.get("/products/:id", async function (req, res) {
   }
 });
 
-  app.get("/categories", async function (req, res) {
-    try {
-      const [fakeStorePromise, dummyJsonPromise] = [
-        fetch("https://fakestoreapi.com/products/categories"),
-        fetch("https://dummyjson.com/products/categories"),
-      ];
+app.get("/categories", async function (req, res) {
+  try {
+    const [fakeStorePromise, dummyJsonPromise] = [
+      fetch("https://fakestoreapi.com/products/categories"),
+      fetch("https://dummyjson.com/products/categories"),
+    ];
 
-      const results = await Promise.allSettled([
-        fakeStorePromise,
-        dummyJsonPromise,
-      ]);
+    const results = await Promise.allSettled([
+      fakeStorePromise,
+      dummyJsonPromise,
+    ]);
 
-      const successfulResults = results.filter(
-        (r) => r.status === "fulfilled" && r.value.ok
-      );
+    const successfulResults = results.filter(
+      (r) => r.status === "fulfilled" && r.value.ok
+    );
 
-      if (successfulResults.length === 0) {
-        return res
-          .status(502)
-          .json({ error: "Failed to fetch categories from both APIs" });
-      }
-
-      const data = await Promise.all(
-        successfulResults.map((r) => r.value.json())
-      );
-
-      const allCategories = [...new Set(data.flat())];
-
-      res.status(200).json(allCategories);
-    } catch (err) {
-      console.error("Error fetching categories:", err.message);
-      res.status(500).json({ error: "Internal server error" });
+    if (successfulResults.length === 0) {
+      return res
+        .status(502)
+        .json({ error: "Failed to fetch categories from both APIs" });
     }
-  });
+
+    const data = await Promise.all(
+      successfulResults.map((r) => r.value.json())
+    );
+
+    const allCategories = [...new Set(data.flat())];
+
+    res.status(200).json(allCategories);
+  } catch (err) {
+    console.error("Error fetching categories:", err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 app.post("/logout", (req, res) => {
   res.status(200).send("Logout successful");

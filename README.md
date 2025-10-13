@@ -8,8 +8,9 @@ No authentication or database integration is used — all data is stored locally
 ## Features
 
 - User Signup & Login (data stored locally in `data.json`)
-- Fetch Products from **Fake Store API**
+- Fetch Products from **Fake Store API** &  **DummyJSON API**
 - Fetch a Single Product by ID
+- Fetch All Categories from both APIs
 - Basic Logout endpoint
 - Error-handled and clean Express.js routes
 
@@ -19,7 +20,7 @@ No authentication or database integration is used — all data is stored locally
 - **Runtime:** Node.js  
 - **Framework:** Express.js  
 - **Templating Engine:** EJS  
-- **External API:** [Fake Store API](https://fakestoreapi.com/)  
+- **External API:** [Fake Store API](https://fakestoreapi.com/), [DummyJSON API](https://dummyjson.com/)  
 - **CORS Enabled** for frontend access
 
 ---
@@ -33,16 +34,17 @@ No authentication or database integration is used — all data is stored locally
 | **POST** | `/login` | Login existing user (verifies credentials from file) |
 | **GET** | `/products` | Fetch all products from Fake Store API |
 | **GET** | `/products/:id` | Fetch product details by product ID |
+| **GET** | `/categories` | Fetch unique categories merged from both APIs |
 | **POST** | `/logout` | Dummy logout endpoint (no real session handling) |
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 <img src="/Folder-Structure.png" />
 
 
-## 🛠️ Installation & Setup
+##  Installation & Setup
 
 1. **Clone this repository**
    ```bash

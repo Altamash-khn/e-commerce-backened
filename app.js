@@ -169,7 +169,9 @@ app.get("/categories", async function (req, res) {
       successfulResults.map((r) => r.value.json())
     );
 
-    const allCategories = [...new Set(data.flat())];
+    const allCategories = [...new Set(data.flat(Infinity))].map((item) =>
+      typeof item === "object" ? item.slug : item
+    );
 
     res.status(200).json(allCategories);
   } catch (err) {

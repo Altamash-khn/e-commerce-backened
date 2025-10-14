@@ -38,6 +38,9 @@ function saveUsers(users) {
 
 app.get("/", async function (req, res) {
   res.render("index");
+  fetch("https://fakestoreapi.com/carts")
+    .then((res) => res.json())
+    .then((data) => console.log(data));
 });
 
 app.post("/signup", (req, res) => {
@@ -176,6 +179,43 @@ app.get("/categories", async function (req, res) {
     res.status(200).json(allCategories);
   } catch (err) {
     console.error("Error fetching categories:", err.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.get("/categories/:name", async function (req, res) {
+  try {
+    const category = req.params.name;
+
+    const [fakeStorePromise, dummyJsonPromise] = [
+      fetch(`https://fakestoreapi.com/products/category/${category}`),
+      fetch(`https://dummyjson.com/products/category/${category}`),
+    ];
+
+    const results = await Promise.allSettled([
+      fakeStorePromise,
+      dummyJsonPromise,
+    ]);
+
+    const successful = results.filter(
+      (r) => r.status === "fulfilled" && r.value.ok
+    );
+
+    if (successful.length === 0) {
+      return res
+        .status(502)
+        .json({ error: "Failed to fetch products for this category" });
+    }
+
+    const data = await Promise.all(successful.map((r) => r.value.json()));
+
+    const allProducts = data.flatMap((d) =>
+      Array.isArray(d) ? d : d.products
+    );
+
+    res.status(200).json(allProducts);
+  } catch (err) {
+    console.error("Error fetching category products:", err.message);
     res.status(500).json({ error: "Internal server error" });
   }
 });

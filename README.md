@@ -35,6 +35,7 @@ No authentication or database integration is used — all data is stored locally
 | **GET** | `/products` | Fetch all products from Fake Store API |
 | **GET** | `/products/:id` | Fetch product details by product ID |
 | **GET** | `/categories` | Fetch unique categories merged from both APIs |
+| **GET** | `/categories/:name` | Fetch all products for a specific category from both APIs |
 | **POST** | `/logout` | Dummy logout endpoint (no real session handling) |
 
 ---

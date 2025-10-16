@@ -124,25 +124,60 @@ app.get("/products", async function (req, res) {
   }
 });
 
+// app.get("/products/:id", async function (req, res) {
+//   try {
+//     const id = req.params.id;
+
+//     if (isNaN(id)) {
+//       return res.status(400).send("Product ID must be a number");
+//     }
+
+//     const apiRes = await fetch(`https://fakestoreapi.com/products/${id}`);
+
+//     if (!apiRes.ok) {
+//       return res.status(apiRes.status).send("failed to fetch product");
+//     }
+
+//     const product = await apiRes.json();
+
+//     res.json(product);
+//   } catch (error) {
+//     res.status(500).send("internal server error");
+//   }
+// });
+
 app.get("/products/:id", async function (req, res) {
   try {
     const id = req.params.id;
 
-    if (isNaN(id)) {
-      return res.status(400).send("Product ID must be a number");
+    const [fakeStorePromise, dummyJsonPromise] = [
+      fetch(`https://fakestoreapi.com/products/${id}`),
+      fetch(`https://dummyjson.com/products/${id}`),
+    ];
+
+    const results = await Promise.allSettled([
+      fakeStorePromise,
+      dummyJsonPromise,
+    ]);
+
+    const successful = results.filter(
+      (r) => r.status === "fulfilled" && r.value.ok
+    );
+
+    if (successful.length === 0) {
+      return res
+        .status(502)
+        .json({ error: "Failed to fetch product from both APIs" });
     }
 
-    const apiRes = await fetch(`https://fakestoreapi.com/products/${id}`);
+    const data = await Promise.all(successful.map((r) => r.value.json()));
 
-    if (!apiRes.ok) {
-      return res.status(apiRes.status).send("failed to fetch product");
-    }
+    const merged = Object.assign({}, ...data);
 
-    const product = await apiRes.json();
-
-    res.json(product);
-  } catch (error) {
-    res.status(500).send("internal server error");
+    res.status(200).json(merged);
+  } catch (err) {
+    console.error("Error fetching product:", err.message);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

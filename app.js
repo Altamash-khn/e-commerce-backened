@@ -155,10 +155,7 @@ app.get("/products/:id", async function (req, res) {
       fetch(`https://dummyjson.com/products/${id}`),
     ];
 
-    const results = await Promise.allSettled([
-      fakeStorePromise,
-      dummyJsonPromise,
-    ]);
+    const results = await Promise.allSettled([fakeStorePromise, dummyJsonPromise]);
 
     const successful = results.filter(
       (r) => r.status === "fulfilled" && r.value.ok
@@ -166,8 +163,8 @@ app.get("/products/:id", async function (req, res) {
 
     if (successful.length === 0) {
       return res
-        .status(502)
-        .json({ error: "Failed to fetch product from both APIs" });
+        .status(404)
+        .json({ error: `Product with ID ${id} not found in either API` });
     }
 
     const data = await Promise.all(successful.map((r) => r.value.json()));
@@ -176,10 +173,11 @@ app.get("/products/:id", async function (req, res) {
 
     res.status(200).json(merged);
   } catch (err) {
-    console.error("Error fetching product:", err.message);
+    console.error("Error fetching product:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 app.get("/categories", async function (req, res) {
   try {

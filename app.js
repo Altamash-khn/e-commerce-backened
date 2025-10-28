@@ -13,7 +13,6 @@ app.set("view engine", "ejs");
 app.set("views", "index");
 
 const dataFile = path.join(__dirname, "data.json");
-const categories = [];
 
 function readUsers() {
   try {
@@ -47,23 +46,22 @@ app.post("/signup", (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res.status(400).send("Username and password are required.");
+    return res.status(400).json("Username and password are required.");
   }
 
   try {
     const users = readUsers();
 
     if (users.find((u) => u.username === username)) {
-      return res.status(409).send("Username already exists.");
+      return res.status(409).json("Username already exists.");
     }
 
     users.push({ username, password });
     saveUsers(users);
 
-    res.status(201).send("user added successfully");
+    res.status(201).json("user added successfully");
   } catch (err) {
-    console.error("Signup error:", err.message);
-    res.status(500).send("Internal server error.");
+    res.status(500).json("Internal server error.");
   }
 });
 
@@ -71,12 +69,12 @@ app.post("/login", (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
-    return res.status(400).send("Username and password are required.");
+    return res.status(400).json("Username and password are required.");
   }
 
   try {
     if (!fs.existsSync(dataFile)) {
-      return res.status(404).send("No users found. Please sign up first.");
+      return res.status(404).json("No users found. Please sign up first.");
     }
 
     const fileData = fs.readFileSync(dataFile, "utf-8");
@@ -87,13 +85,12 @@ app.post("/login", (req, res) => {
     );
 
     if (found) {
-      return res.status(200).send("Login successful");
+      return res.status(200).json("Login successful");
     }
 
-    return res.status(401).send("Invalid username or password.");
+    return res.status(401).json("Invalid username or password.");
   } catch (err) {
-    console.error("Login error:", err.message);
-    res.status(500).send("Internal server error.");
+    res.status(500).json("Internal server error.");
   }
 });
 
@@ -120,7 +117,7 @@ app.get("/products", async function (req, res) {
 
     res.status(200).json(finalData);
   } catch (err) {
-    res.status(500).send("internal server error");
+    res.status(500).json("internal server error");
   }
 });
 
@@ -155,7 +152,6 @@ app.get("/products/:id", async function (req, res) {
       ...result.data,
     });
   } catch (err) {
-    console.error("Error fetching product:", err);
     res.status(404).json({
       error: `Product with that ID not found in either API.`,
     });
@@ -231,13 +227,12 @@ app.get("/categories/:name", async function (req, res) {
 
     res.status(200).json(allProducts);
   } catch (err) {
-    console.error("Error fetching category products:", err.message);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
 app.post("/logout", (req, res) => {
-  res.status(200).send("Logout successful");
+  res.status(200).json("Logout successful");
 });
 
 app.listen(3000);

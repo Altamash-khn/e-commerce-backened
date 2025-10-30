@@ -33,7 +33,6 @@ BASE_API = "https://e-commerce-backened-4fih.onrender.com/"
 
 | Method   | Endpoint            | Description                                               |
 | -------- | ------------------- | --------------------------------------------------------- |
-| **GET**  | `/`                 | Renders home page (EJS template)                          |
 | **POST** | `/signup`           | Add new user (saves username & password to `data.json`)   |
 | **POST** | `/login`            | Login existing user (verifies credentials from file)      |
 | **GET**  | `/products`         | Fetch all products from Fake Store API                    |
@@ -53,18 +52,7 @@ BASE_API = "https://e-commerce-backened-4fih.onrender.com/"
     "password": "your_password"
   }
   ```
-
-## Example Usage (Frontend Fetch)
-
-### Signup Request
-
-```js
-fetch("https://e-commerce-backened-4fih.onrender.com/signup", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ username: "asgrj", password: "Qwerty@123" }),
-}).then((res) => (res.status ? <Homepage /> : res.error));
-```
+  D
 
 ## Project Structure
 

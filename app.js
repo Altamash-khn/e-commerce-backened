@@ -66,7 +66,10 @@ app.post("/login", (req, res) => {
       (user) => user.username === username && user.password === password
     );
 
-    if (found) return res.status(200).json("Login successful");
+    if (found)
+      return res
+        .status(200)
+        .json({ message: "Login successful", username: found.username });
     res.status(401).json("Invalid username or password.");
   } catch (err) {
     res.status(500).json("Internal server error.");

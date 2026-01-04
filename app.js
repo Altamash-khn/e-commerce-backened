@@ -3,6 +3,11 @@ const fs = require("fs");
 const path = require("path");
 const cors = require("cors");
 
+require("dotenv").config();
+const Stripe = require("stripe");
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
@@ -76,6 +81,47 @@ app.post("/login", (req, res) => {
   }
 });
 
+app.post("/logout", (req, res) => {
+  res.status(200).json("Logout successful");
+});
+
+app.post("/create-checkout-session", async (req, res) => {
+  try {
+    const { cartItems, successUrl, cancelUrl } = req.body;
+
+    if (!cartItems || cartItems.length === 0) {
+      return res.status(400).json({ error: "Cart is empty" });
+    }
+
+    if (!successUrl || !cancelUrl) {
+      return res.status(400).json({ error: "Missing redirect URLs" });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "payment",
+      line_items: cartItems.map((item) => ({
+        price_data: {
+          currency: "inr",
+          product_data: {
+            name: item.title,
+            description: item.description,
+          },
+          unit_amount: Math.round(item.price * 100),
+        },
+        quantity: item.quantity,
+      })),
+      success_url: successUrl,
+      cancel_url: cancelUrl,
+    });
+
+    res.status(200).json({ url: session.url });
+  } catch (error) {
+    console.error("Stripe error:", error.message);
+    res.status(500).json({ error: "Stripe session creation failed" });
+  }
+});
+
 app.get("/products", async (req, res) => {
   try {
     const apiRes = await fetch("https://dummyjson.com/products");
@@ -129,10 +175,6 @@ app.get("/categories/:name", async (req, res) => {
   } catch {
     res.status(500).json({ error: "Internal server error" });
   }
-});
-
-app.post("/logout", (req, res) => {
-  res.status(200).json("Logout successful");
 });
 
 app.listen(3000);
